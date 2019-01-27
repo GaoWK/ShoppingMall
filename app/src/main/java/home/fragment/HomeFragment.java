@@ -22,6 +22,7 @@ import base.BaseFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import home.adapter.HomeFragmentAdapter;
 import home.bean.ResultBeanData;
 import okhttp3.Call;
 import okhttp3.Request;
@@ -39,6 +40,7 @@ public class HomeFragment extends BaseFragment {
     private TextView tv_search_home;
     private TextView tv_message_home;
     private ResultBeanData.ResultBean resultBean;
+    private HomeFragmentAdapter adapter;
 
     @Override
     public View initView() {
@@ -140,15 +142,41 @@ public class HomeFragment extends BaseFragment {
 
     }
 //
-    private void processData(String json) {
-        if (!TextUtils.isEmpty(json)) {
+private void processData(String json) {
+    ResultBeanData resultBeanData = JSON.parseObject(json,ResultBeanData.class);
+    resultBean = resultBeanData.getResult();
+    if(resultBean != null){
+        //有数据
+        //设置适配器
+        adapter = new HomeFragmentAdapter(mContext,resultBean);
+        Log.e(TAG,"banner的第一张："+resultBean.getBanner_info().get(0).getImage());
+        rvHome.setAdapter(adapter);
+        Log.e(TAG,"adapter设置成功");
+        GridLayoutManager manager =  new GridLayoutManager(mContext,1);
+//        //设置跨度大小监听
+//        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+//            @Override
+//            public int getSpanSize(int position) {
+//                if(position <= 3){
+//                    //隐藏
+//                    ib_top.setVisibility(View.GONE);
+//                }else{
+//                    //显示
+//                    ib_top.setVisibility(View.VISIBLE);
+//                }
+//                //只能返回1
+//                return 1;
+//            }
+//        });
+        //设置布局管理者
+        rvHome.setLayoutManager(manager);
 
-            ResultBeanData resultBeanData = JSON.parseObject(json, ResultBeanData.class);
-            resultBean = resultBeanData.getResult();
-        //    Log.e(TAG,"resultBean=="+resultBean.getBanner_info().get(0).getType());
-
-        }
+    }else{
+        //没有数据
     }
+    Log.e(TAG,"解析成功=="+resultBean.getHot_info().get(0).getName());
+}
+
 
 
 }
