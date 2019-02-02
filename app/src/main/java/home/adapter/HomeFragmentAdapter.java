@@ -1,9 +1,14 @@
 package home.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -24,9 +30,12 @@ import com.youth.banner.loader.ImageLoader;
 import com.zhy.magicviewpager.transformer.AlphaPageTransformer;
 import com.zhy.magicviewpager.transformer.ScaleInTransformer;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import app.GoodsInfoActivity;
 import home.bean.ResultBeanData;
 import home.fragment.HomeFragment;
 import utils.Constants;
@@ -118,6 +127,12 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             return new ChannelViewHolder(mLayoutInflater.inflate(R.layout.channel_item, null), mContext);
         } else if (viewType == ACT) {
             return new ActViewHolder(mContext, mLayoutInflater.inflate(R.layout.act_item, null));
+        } else if (viewType == SECKILL) {
+            return new SeckillViewHolder(mContext, mLayoutInflater.inflate(R.layout.seckill_item, null));
+        } else if (viewType == RECOMMEND) {
+            return new RecommendViewHolder(mContext, mLayoutInflater.inflate(R.layout.recommend_item, null));
+        } else if (viewType == HOT) {
+            return new HotViewHolder(mContext, mLayoutInflater.inflate(R.layout.hot_item, null));
         }
         return null;
     }
@@ -133,10 +148,29 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
         } else if (getItemViewType(position) == ACT) {
             ActViewHolder actViewHolder = (ActViewHolder) holder;
             actViewHolder.setData(resultBean.getAct_info());
+        } else if (getItemViewType(position) == SECKILL) {
+            SeckillViewHolder seckillViewHolder = (SeckillViewHolder) holder;
+            seckillViewHolder.setData(resultBean.getSeckill_info());
+        } else if (getItemViewType(position) == RECOMMEND) {
+            RecommendViewHolder recommendViewHolder = (RecommendViewHolder) holder;
+            recommendViewHolder.setData(resultBean.getRecommend_info());
+        } else if (getItemViewType(position) == HOT) {
+            HotViewHolder hotViewHolder = (HotViewHolder) holder;
+            hotViewHolder.setData(resultBean.getHot_info());
         }
 
     }
 
+
+    //主页recyclerVeiw item种类数目
+    @Override
+    public int getItemCount() {
+        return 6;
+    }
+
+    /**
+     * BannerVeiwHolder
+     */
     class BannerViewHolder extends RecyclerView.ViewHolder {
         private Context mContext;
         private Banner banner;
@@ -171,22 +205,28 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
             });
 
             banner.start();
-//            //设置item的点击事件
-//            banner.setOnBannerClickListener(new OnBannerClickListener() {
-//                @Override
-//                public void OnBannerClick(int position) {
-//                    Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
-////                    startGoodsInfoActivity(goodsBean);
-//                }
-//            });
+            //设置item的点击事件
+            banner.setOnBannerClickListener(new OnBannerClickListener() {
+                @Override
+                public void OnBannerClick(int position) {
+                    Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
+                    startGoodsInfoActivity();
+                }
+            });
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return 3;
+    /**
+     * 启动商品详情界面
+     */
+    private void startGoodsInfoActivity() {
+        Intent intent = new Intent(mContext,GoodsInfoActivity.class);
+        mContext.startActivity(intent);
     }
 
+    /**
+     * ChannelVeiwHolder
+     */
     private class ChannelViewHolder extends RecyclerView.ViewHolder {
         public GridView gvChannel;
         public Context mContext;
@@ -210,6 +250,9 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /**
+     * ActViewHolder
+     */
     private class ActViewHolder extends RecyclerView.ViewHolder {
         private Context mContext;
         private ViewPager act_viewpager;
@@ -253,7 +296,7 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(mContext, "position=="+position, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -261,9 +304,153 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                     return imageView;
                 }
 
+//                @Override
+//                public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+//                    super.destroyItem(container, position, object);
+//                }
+            });
+        }
+    }
+
+
+    /**
+     * SeckillViewHolder
+     */
+    private class SeckillViewHolder extends RecyclerView.ViewHolder {
+        private TextView tv_more_seckill;
+        private RecyclerView rv_seckill;
+        private TextView tv_time_seckill;
+        public Context mContext;
+        private SeckillRecyclerViewAdapter adapter;
+        //相差的时间 服务器提供两个时间 开始时间和结束时间 相减得到倒计时时间
+        private long dt = 0;
+
+        @SuppressLint("HandlerLeak")
+        private Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                dt = dt - 1000;
+                SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                String time = formatter.format(new Date(dt));
+                tv_time_seckill.setText(time);
+                handler.removeMessages(0);
+                handler.sendEmptyMessageDelayed(0, 1000);
+                if (dt <= 0) {
+                    //把消息移除
+                    handler.removeCallbacksAndMessages(null);
+                }
+
+            }
+        };
+
+        public SeckillViewHolder(Context mContext, View itemView) {
+            super(itemView);
+            tv_more_seckill = itemView.findViewById(R.id.tv_more_seckill);
+            rv_seckill = itemView.findViewById(R.id.rv_seckill);
+            tv_time_seckill = itemView.findViewById(R.id.tv_time_seckill);
+            this.mContext = mContext;
+        }
+
+        public void setData(final ResultBeanData.ResultBean.SeckillInfoBean seckill_info) {
+            //设置文本(秒杀时间)和recycVewi的数据
+            adapter = new SeckillRecyclerViewAdapter(mContext, seckill_info.getList());
+            rv_seckill.setAdapter(adapter);
+            //设置布局管理器  参数 上下文、方向、是否倒序
+            rv_seckill.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
+            adapter.setOnSeckillRecyclerView(new SeckillRecyclerViewAdapter.OnSeckillRecyclerView() {
                 @Override
-                public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-                    super.destroyItem(container, position, object);
+                public void onItemClick(int position) {
+                    Toast.makeText(mContext, "秒杀" + position, Toast.LENGTH_SHORT).show();
+
+                    ResultBeanData.ResultBean.SeckillInfoBean.ListBean listBean = seckill_info.getList().get(position);
+
+//                    GoodsBean goodsBean = new GoodsBean();
+//                    goodsBean.setCover_price(listBean.getCover_price());
+//                    goodsBean.setFigure(listBean.getFigure());
+//                    goodsBean.setName(listBean.getName());
+//                    goodsBean.setProduct_id(listBean.getProduct_id());
+                    startGoodsInfoActivity();
+                }
+            });
+
+            //秒杀倒计时 -毫秒
+            dt = Integer.valueOf(seckill_info.getEnd_time()) - Integer.valueOf(seckill_info.getStart_time());
+            handler.sendEmptyMessageDelayed(0, 1000);
+        }
+    }
+
+    /**
+     * RecommendViewHolder
+     */
+    private class RecommendViewHolder extends RecyclerView.ViewHolder {
+        private Context mContext;
+        private TextView tv_more_recommend;
+        private GridView gv_recommend;
+        private RecommendGridViewAdapter adapter;
+
+        public RecommendViewHolder(Context mContext, View itemVeiw) {
+            super(itemVeiw);
+            this.mContext = mContext;
+            tv_more_recommend = (TextView) itemView.findViewById(R.id.tv_more_recommend);
+            gv_recommend = (GridView) itemView.findViewById(R.id.gv_recommend);
+        }
+
+        public void setData(final List<ResultBeanData.ResultBean.RecommendInfoBean> recommend_info) {
+            //设置适配器
+            adapter = new RecommendGridViewAdapter(mContext, recommend_info);
+            gv_recommend.setAdapter(adapter);
+            gv_recommend.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
+                    ResultBeanData.ResultBean.RecommendInfoBean recommendInfoBean = recommend_info.get(position);
+
+//                    GoodsBean goodsBean = new GoodsBean();
+//                    goodsBean.setCover_price(recommendInfoBean.getCover_price());
+//                    goodsBean.setFigure(recommendInfoBean.getFigure());
+//                    goodsBean.setName(recommendInfoBean.getName());
+//                    goodsBean.setProduct_id(recommendInfoBean.getProduct_id());
+//                    startGoodsInfoActivity(goodsBean);
+                }
+            });
+        }
+    }
+
+    /**
+     * HotViewHolder
+     */
+    private class HotViewHolder extends RecyclerView.ViewHolder {
+        private TextView tv_more_hot;
+        private GridView gv_hot;
+        private Context mContext;
+
+        public HotViewHolder(Context mContext, View itemView) {
+            super(itemView);
+            this.mContext = mContext;
+            tv_more_hot = itemView.findViewById(R.id.tv_more_hot);
+            gv_hot = itemView.findViewById(R.id.gv_hot);
+        }
+
+        public void setData(final List<ResultBeanData.ResultBean.HotInfoBean> hot_info) {
+            //设置gridVeiw适配器
+            HotGridViewAdapter adapter = new HotGridViewAdapter(mContext, hot_info);
+            gv_hot.setAdapter(adapter);
+
+            //设置item的监听
+            gv_hot.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
+                    //热卖商品信息类
+                    ResultBeanData.ResultBean.HotInfoBean hotInfoBean = hot_info.get(position);
+                    //商品信息类
+//                    GoodsBean goodsBean = new GoodsBean();
+//                    goodsBean.setCover_price(hotInfoBean.getCover_price());
+//                    goodsBean.setFigure(hotInfoBean.getFigure());
+//                    goodsBean.setName(hotInfoBean.getName());
+//                    goodsBean.setProduct_id(hotInfoBean.getProduct_id());
+//                    startGoodsInfoActivity(goodsBean);
                 }
             });
         }
