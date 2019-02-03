@@ -26,6 +26,7 @@ import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 import com.youth.banner.listener.OnBannerClickListener;
+import com.youth.banner.listener.OnBannerListener;
 import com.youth.banner.loader.ImageLoader;
 import com.zhy.magicviewpager.transformer.AlphaPageTransformer;
 import com.zhy.magicviewpager.transformer.ScaleInTransformer;
@@ -36,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 
 import app.GoodsInfoActivity;
+import home.bean.GoodsBean;
 import home.bean.ResultBeanData;
 import home.fragment.HomeFragment;
 import utils.Constants;
@@ -206,11 +208,10 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
 
             banner.start();
             //设置item的点击事件
-            banner.setOnBannerClickListener(new OnBannerClickListener() {
+            banner.setOnBannerListener(new OnBannerListener() {
                 @Override
                 public void OnBannerClick(int position) {
                     Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
-                    startGoodsInfoActivity();
                 }
             });
         }
@@ -219,8 +220,9 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
     /**
      * 启动商品详情界面
      */
-    private void startGoodsInfoActivity() {
+    private void startGoodsInfoActivity(GoodsBean goodsBean) {
         Intent intent = new Intent(mContext,GoodsInfoActivity.class);
+        intent.putExtra(GOODS_BEAN,goodsBean);
         mContext.startActivity(intent);
     }
 
@@ -365,12 +367,12 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
 
                     ResultBeanData.ResultBean.SeckillInfoBean.ListBean listBean = seckill_info.getList().get(position);
 
-//                    GoodsBean goodsBean = new GoodsBean();
-//                    goodsBean.setCover_price(listBean.getCover_price());
-//                    goodsBean.setFigure(listBean.getFigure());
-//                    goodsBean.setName(listBean.getName());
-//                    goodsBean.setProduct_id(listBean.getProduct_id());
-                    startGoodsInfoActivity();
+                    GoodsBean goodsBean = new GoodsBean();
+                    goodsBean.setCover_price(listBean.getCover_price());
+                    goodsBean.setFigure(listBean.getFigure());
+                    goodsBean.setName(listBean.getName());
+                    goodsBean.setProduct_id(listBean.getProduct_id());
+                    startGoodsInfoActivity(goodsBean);
                 }
             });
 
@@ -406,12 +408,12 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                     Toast.makeText(mContext, "position==" + position, Toast.LENGTH_SHORT).show();
                     ResultBeanData.ResultBean.RecommendInfoBean recommendInfoBean = recommend_info.get(position);
 
-//                    GoodsBean goodsBean = new GoodsBean();
-//                    goodsBean.setCover_price(recommendInfoBean.getCover_price());
-//                    goodsBean.setFigure(recommendInfoBean.getFigure());
-//                    goodsBean.setName(recommendInfoBean.getName());
-//                    goodsBean.setProduct_id(recommendInfoBean.getProduct_id());
-//                    startGoodsInfoActivity(goodsBean);
+                    GoodsBean goodsBean = new GoodsBean();
+                    goodsBean.setCover_price(recommendInfoBean.getCover_price());
+                    goodsBean.setFigure(recommendInfoBean.getFigure());
+                    goodsBean.setName(recommendInfoBean.getName());
+                    goodsBean.setProduct_id(recommendInfoBean.getProduct_id());
+                    startGoodsInfoActivity(goodsBean);
                 }
             });
         }
@@ -445,12 +447,12 @@ public class HomeFragmentAdapter extends RecyclerView.Adapter {
                     //热卖商品信息类
                     ResultBeanData.ResultBean.HotInfoBean hotInfoBean = hot_info.get(position);
                     //商品信息类
-//                    GoodsBean goodsBean = new GoodsBean();
-//                    goodsBean.setCover_price(hotInfoBean.getCover_price());
-//                    goodsBean.setFigure(hotInfoBean.getFigure());
-//                    goodsBean.setName(hotInfoBean.getName());
-//                    goodsBean.setProduct_id(hotInfoBean.getProduct_id());
-//                    startGoodsInfoActivity(goodsBean);
+                    GoodsBean goodsBean = new GoodsBean();
+                    goodsBean.setCover_price(hotInfoBean.getCover_price());
+                    goodsBean.setFigure(hotInfoBean.getFigure());
+                    goodsBean.setName(hotInfoBean.getName());
+                    goodsBean.setProduct_id(hotInfoBean.getProduct_id());
+                    startGoodsInfoActivity(goodsBean);
                 }
             });
         }

@@ -45,14 +45,15 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="5dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        tools:ignore="ExtraText">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.atguigu.shoppingmall.view.ScrollViewContainer
+            <app.ScrollViewContainer
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -84,10 +85,9 @@
                         <TextView
                             android:id="@+id/tv_good_info_desc"
                             android:layout_width="match_parent"
-
                             android:layout_height="wrap_content"
                             android:padding="10dp"
-                            android:text="预售截止 10 月 15日，预售期为限量 礼盒版，包括特制木盒 x1、画集 x1、邮票 x1 套、书签 x1、贴纸 x1、信封 x1、礼盒特"
+                            android:text="预售截止 10 月 15 日，预售期为限量 礼盒版，包括特制木盒 x1、画集 x1、邮票 x1 套、书签 x1、贴纸 x1、信封 x1、礼盒特"
                             android:textColor="#767f86" />
 
                         <TextView
@@ -190,7 +190,7 @@
 
                 </ScrollView>
 
-            </com.atguigu.shoppingmall.view.ScrollViewContainer>
+            </app.ScrollViewContainer>
         </LinearLayout>
 
         <LinearLayout
